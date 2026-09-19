@@ -4,10 +4,10 @@ namespace ecommerce.Domain.Interfaces;
 
 public interface IProductRepository
 {
-    public Task<List<ProductEntity>> GetAllProducts();
-    public Task<ProductEntity?> GetProductById(Guid id);
-    public Task<ProductEntity> CreateProduct(ProductEntity product);
-    public Task UpdateProduct(ProductEntity product);
-    public Task DeleteProduct(ProductEntity product);
-    public Task<List<ProductEntity>> GetProductsByCategory(Guid categoryId);
+    Task<List<ProductEntity>> GetAllProducts(CancellationToken ct = default);
+    Task<ProductEntity?> GetProductById(Guid id, CancellationToken ct = default);
+    Task<ProductEntity> CreateProduct(ProductEntity product, CancellationToken ct = default);
+    Task UpdateProduct(ProductEntity product, CancellationToken ct = default);
+    Task DeleteProduct(ProductEntity product, CancellationToken ct = default);
+    Task<List<ProductEntity>> GetProductsByCategory(CategoryEntity category, CancellationToken ct = default);
 }
