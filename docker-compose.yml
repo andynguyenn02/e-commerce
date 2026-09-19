@@ -1,0 +1,14 @@
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64 # no arm64 image; runs under Rosetta on Apple Silicon
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: ${MSSQL_SA_PASSWORD:-Local_Dev_Pass123!} # local dev only
+    ports:
+      - "1433:1433"
+    volumes:
+      - mssql-data:/var/opt/mssql
+
+volumes:
+  mssql-data:
