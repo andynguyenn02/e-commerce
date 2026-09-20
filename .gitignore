@@ -29,7 +29,7 @@ _ReSharper*/
 
 # Test & coverage
 [Tt]est[Rr]esult*/
-coverage*.json
+coverage*.json  
 coverage*.xml
 *.coverage
 *.trx
