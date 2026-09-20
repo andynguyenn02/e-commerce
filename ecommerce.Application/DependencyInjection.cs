@@ -1,6 +1,7 @@
 using System.Reflection;
 using ecommerce.Application.Common.Behaviors;
 using FluentValidation;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace ecommerce.Application;
 

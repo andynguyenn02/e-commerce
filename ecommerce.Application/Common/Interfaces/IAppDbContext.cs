@@ -5,16 +5,16 @@ namespace ecommerce.Application.Common.Interfaces;
 
 public interface IAppDbContext
 {
-    DbSet<ProductEntity> Products { get; }
-    DbSet<CategoryEntity> Categories { get; }
-    DbSet<CartEntity> Carts { get; }
-    DbSet<OrderEntity> Orders { get; }
-    DbSet<InventoryJobEntity> InventoryJobs { get; }
-    DbSet<CartItemEntity> CartItems { get; }
-    DbSet<OrderItemEntity> OrderItems { get; }
-    DbSet<UserEntity> Users { get; }
-    DbSet<WalletEntity> Wallets { get; }
-    DbSet<WalletTransactionEntity> WalletTransactions { get; }
+    DbSet<ProductEntity> Products { get; set; }
+    DbSet<CategoryEntity> Categories { get; set; }
+    DbSet<CartEntity> Carts { get; set; }
+    DbSet<OrderEntity> Orders { get; set; }
+    DbSet<InventoryJobEntity> InventoryJobs { get; set; }
+    DbSet<CartItemEntity> CartItems { get; set; }
+    DbSet<OrderItemEntity> OrderItems { get; set; }
+    DbSet<UserEntity> Users { get; set; }
+    DbSet<WalletEntity> Wallets { get; set; }
+    DbSet<WalletTransactionEntity> WalletTransactions { get; set; }
     
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
 }
