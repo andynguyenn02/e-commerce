@@ -15,7 +15,7 @@ public class GetProductByCategoryQueryHandler(
 
         var products = await appDbContext.Products.Where(p => p.CategoryId == request.CategoryId)
             .Select(p => new GetProductByCategoryDto(p.Id, p.Name, p.Price, p.Code, p.AvailableQuantity, p.CategoryId))
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
 
         return products;
     }

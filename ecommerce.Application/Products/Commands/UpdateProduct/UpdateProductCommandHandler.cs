@@ -19,7 +19,6 @@ public class UpdateProductCommandHandler(IAppDbContext appDbContext)
         product.Code = request.Product.Code;
         product.AvailableQuantity = request.Product.AvailableQuantity;
         product.CategoryId = category.Id;
-        product.Category = category;
         product.UpdatedAt = DateTime.UtcNow;
         
         await appDbContext.SaveChangesAsync(cancellationToken);
