@@ -17,4 +17,18 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<WalletEntity> Wallets { get; set; }
     public DbSet<WalletTransactionEntity> WalletTransactions { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        modelBuilder.Entity<ProductEntity>().HasIndex(p => p.Code).IsUnique();
+        modelBuilder.Entity<UserEntity>().HasIndex(u => u.UserName).IsUnique();
+        modelBuilder.Entity<CartEntity>().HasIndex(c => c.UserId).IsUnique();
+        modelBuilder.Entity<WalletTransactionEntity>()
+        .HasOne(wt => wt.Order)
+        .WithMany()
+        .HasForeignKey(wt => wt.OrderId)
+        .OnDelete(DeleteBehavior.Restrict);
+    }
 }

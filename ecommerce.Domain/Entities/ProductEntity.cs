@@ -8,5 +8,7 @@ public class ProductEntity : CommonEntity
     public required int AvailableQuantity { get; set; }
     
     public required Guid CategoryId { get; set; }
-    public required CategoryEntity Category { get; set; }
+    public CategoryEntity? Category { get; set; }
+
+    public required bool IsDeleted {get;set;}
 }

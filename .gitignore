@@ -5,3 +5,41 @@ riderModule.iml
 /_ReSharper.Caches/
 .idea/*
 .env
+# .NET build output
+[Dd]ebug/
+[Rr]elease/
+[Xx]64/
+[Xx]86/
+artifacts/
+*.dll
+*.exe
+*.pdb
+*.cache
+
+# IDE / user-specific
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.DotSettings.user
+.vs/
+.vscode/
+_ReSharper*/
+*.[Rr]e[Ss]harper
+
+# Test & coverage
+[Tt]est[Rr]esult*/
+coverage*.json
+coverage*.xml
+*.coverage
+*.trx
+
+# NuGet
+*.nupkg
+*.snupkg
+.nuget/
+
+# Logs & OS
+*.log
+msbuild.log
+.DS_Store
