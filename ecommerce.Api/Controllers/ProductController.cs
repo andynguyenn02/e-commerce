@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Models;
 using ecommerce.Application.Products.Commands.CreateProduct;
 using ecommerce.Application.Products.Commands.DeleteProduct;
 using ecommerce.Application.Products.Commands.UpdatePrice;
@@ -17,9 +18,14 @@ public class ProductController(ISender sender) : ControllerBase
 {
     [AllowAnonymous]
     [HttpGet]
-    public async Task<ActionResult<List<ProductDto>>> GetAll(CancellationToken ct)
+    public async Task<ActionResult<PagedResult<ProductDto>>> GetAll(
+        [FromQuery] GetAllProductsQuery request, CancellationToken ct)
     {
-        return await sender.Send(new GetAllProductsQuery(), ct);
+        return await sender.Send(new GetAllProductsQuery
+        {
+            PageNumber = request.PageNumber,
+            PageSize = request.PageSize
+        }, ct);
     }
 
     [AllowAnonymous]
