@@ -230,7 +230,8 @@ namespace ecommerce.Infrastructure.Migrations
                     b.HasIndex("CategoryId");
 
                     b.HasIndex("Code")
-                        .IsUnique();
+                        .IsUnique()
+                        .HasFilter("[IsDeleted] = 0");
 
                     b.ToTable("Products");
                 });

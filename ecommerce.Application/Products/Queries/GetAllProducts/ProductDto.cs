@@ -6,5 +6,6 @@ public record ProductDto(
     decimal Price,
     string Code,
     int AvailableQuantity,
-    Guid CategoryId
+    Guid CategoryId,
+    DateTime CreatedAt
 );

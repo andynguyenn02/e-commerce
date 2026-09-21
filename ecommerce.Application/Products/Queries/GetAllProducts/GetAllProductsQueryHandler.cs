@@ -10,7 +10,7 @@ public class GetAllProductsQueryHandler(IAppDbContext appDbContext)
     public async Task<List<ProductDto>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
     {
         var products = await appDbContext.Products.Select(p =>
-                new ProductDto(p.Id, p.Name, p.Price, p.Code, p.AvailableQuantity, p.CategoryId))
+                new ProductDto(p.Id, p.Name, p.Price, p.Code, p.AvailableQuantity, p.CategoryId, p.CreatedAt))
             .ToListAsync(cancellationToken);
 
         return products;

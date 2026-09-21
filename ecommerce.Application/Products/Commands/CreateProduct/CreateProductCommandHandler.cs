@@ -1,7 +1,7 @@
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
-using ecommerce.Domain.Interfaces;
 using MediatR;
+
 namespace ecommerce.Application.Products.Commands.CreateProduct;
 
 public class CreateProductCommandHandler(
@@ -9,22 +9,19 @@ public class CreateProductCommandHandler(
 {
     public async Task<Guid> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
-        var category = await appDbContext.Categories.FindAsync([request.CategoryId], cancellationToken) 
-        ?? throw new KeyNotFoundException("Categories invalid");
+        var category = await appDbContext.Categories.FindAsync([request.CategoryId], cancellationToken)
+                       ?? throw new KeyNotFoundException("Categories invalid");
 
-        var product = new ProductEntity()
+        var product = new ProductEntity
         {
-            Id = Guid.CreateVersion7(),
             Name = request.Name,
             Price = request.Price,
             Code = request.Code,
             AvailableQuantity = request.AvailableQuantity,
             CategoryId = request.CategoryId,
-            IsDeleted = false,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            IsDeleted = false
         };
-        
+
         appDbContext.Products.Add(product);
         await appDbContext.SaveChangesAsync(cancellationToken);
         return product.Id;

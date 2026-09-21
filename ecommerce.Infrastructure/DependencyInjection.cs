@@ -1,5 +1,6 @@
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Infrastructure.Persistence;
+using ecommerce.Infrastructure.Security;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +18,9 @@ public static class DependencyInjection
 
         services.AddDbContext<ApplicationDbContext>(o => o.UseSqlServer(connectionString));
         services.AddScoped<IAppDbContext>(sp => sp.GetRequiredService<ApplicationDbContext>());
+        services.AddSingleton<IPasswordHasher, PasswordHasher>();
+        services.AddSingleton<IJwtService, JwtService>();
+        services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.Section));
 
         return services;
     }

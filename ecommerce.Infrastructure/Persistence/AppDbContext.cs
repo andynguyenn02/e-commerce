@@ -18,17 +18,50 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<WalletEntity> Wallets { get; set; }
     public DbSet<WalletTransactionEntity> WalletTransactions { get; set; }
 
+    public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    {
+        ApplyTimeStamp();
+        return base.SaveChangesAsync(cancellationToken);
+    }
+
+    public override int SaveChanges()
+    {
+        ApplyTimeStamp();
+        return base.SaveChanges();
+    }
+
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
 
-        modelBuilder.Entity<ProductEntity>().HasIndex(p => p.Code).IsUnique();
+        modelBuilder.Entity<ProductEntity>().HasIndex(p => p.Code).IsUnique().HasFilter("[IsDeleted] = 0");
+        modelBuilder.Entity<ProductEntity>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<UserEntity>().HasIndex(u => u.UserName).IsUnique();
         modelBuilder.Entity<CartEntity>().HasIndex(c => c.UserId).IsUnique();
         modelBuilder.Entity<WalletTransactionEntity>()
-        .HasOne(wt => wt.Order)
-        .WithMany()
-        .HasForeignKey(wt => wt.OrderId)
-        .OnDelete(DeleteBehavior.Restrict);
+            .HasOne(wt => wt.Order)
+            .WithMany()
+            .HasForeignKey(wt => wt.OrderId)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
+
+    //Automate assign created and updated timestamp
+    private void ApplyTimeStamp()
+    {
+        var now = DateTime.UtcNow;
+
+        foreach (var entry in ChangeTracker.Entries<CommonEntity>())
+            switch (entry.State)
+            {
+                case EntityState.Added:
+                    entry.Entity.Id = Guid.CreateVersion7();
+                    entry.Entity.CreatedAt = now;
+                    entry.Entity.UpdatedAt = now;
+                    break;
+                case EntityState.Modified:
+                    entry.Entity.UpdatedAt = now;
+                    break;
+            }
     }
 }
