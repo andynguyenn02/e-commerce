@@ -10,9 +10,21 @@ public class GetAllProductsQueryHandler(IAppDbContext appDbContext)
 {
     public async Task<PagedResult<ProductDto>> Handle(GetAllProductsQuery request, CancellationToken cancellationToken)
     {
-        var products = appDbContext.Products.OrderBy(p => p.CreatedAt).Select(p =>
-            new ProductDto(p.Id, p.Name, p.Price, p.Code, p.AvailableQuantity, p.CategoryId, p.CreatedAt));
+        var products = appDbContext.Products.AsQueryable();
 
-        return await products.ToPageResultAsync(request.PageNumber, request.PageSize, cancellationToken);
+        if (!string.IsNullOrWhiteSpace(request.Search))
+            products = products
+                .Where(p => p.Name.Contains(request.Search) || p.Code.Contains(request.Search));
+
+        if (request.CategoryId is not null)
+            products = products
+                .Where(p => p.CategoryId == request.CategoryId);
+
+        var projection = products
+            .OrderBy(p => p.CreatedAt)
+            .Select(p =>
+                new ProductDto(p.Id, p.Name, p.Price, p.Code, p.AvailableQuantity, p.CategoryId, p.CreatedAt));
+
+        return await projection.ToPageResultAsync(request.PageNumber, request.PageSize, cancellationToken);
     }
 }

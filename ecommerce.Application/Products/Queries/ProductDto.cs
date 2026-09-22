@@ -1,4 +1,4 @@
-namespace ecommerce.Application.Products.Queries.GetAllProducts;
+namespace ecommerce.Application.Products.Queries;
 
 public record ProductDto(
     Guid Id,

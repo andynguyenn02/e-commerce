@@ -3,8 +3,8 @@ using ecommerce.Application.Products.Commands.CreateProduct;
 using ecommerce.Application.Products.Commands.DeleteProduct;
 using ecommerce.Application.Products.Commands.UpdatePrice;
 using ecommerce.Application.Products.Commands.UpdateProduct;
+using ecommerce.Application.Products.Queries;
 using ecommerce.Application.Products.Queries.GetAllProducts;
-using ecommerce.Application.Products.Queries.GetProductByCategoryId;
 using ecommerce.Application.Products.Queries.GetProductById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -24,23 +24,17 @@ public class ProductController(ISender sender) : ControllerBase
         return await sender.Send(new GetAllProductsQuery
         {
             PageNumber = request.PageNumber,
-            PageSize = request.PageSize
+            PageSize = request.PageSize,
+            Search = request.Search,
+            CategoryId = request.CategoryId
         }, ct);
     }
 
     [AllowAnonymous]
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<GetProductByIdDto>> GetByProductId(Guid id, CancellationToken ct)
+    public async Task<ActionResult<ProductDto>> GetByProductId(Guid id, CancellationToken ct)
     {
         return await sender.Send(new GetProductByIdQuery(id), ct);
-    }
-
-    [AllowAnonymous]
-    [HttpGet("/category/{categoryId:guid}")]
-    public async Task<ActionResult<List<GetProductByCategoryDto>>> GetByCategoryId(Guid categoryId,
-        CancellationToken ct)
-    {
-        return await sender.Send(new GetProductByCategoryQuery(categoryId), ct);
     }
 
     [Authorize(Policy = "Admin")]
