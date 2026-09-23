@@ -10,8 +10,7 @@ public class UpdateCartItemQuantityCommandHandler(IAppDbContext context, ICurren
 {
     public async Task Handle(UpdateCartItemQuantityCommand request, CancellationToken cancellationToken)
     {
-        if (currentUser.UserId is not { } userId) throw new UnauthorizedAccessException("Unauthorized");
-        var userCart = await context.GetOrCreateCart(userId, cancellationToken);
+        var userCart = await context.GetOrCreateCart(currentUser.UserId, cancellationToken);
 
         var cartItem = await context.CartItems.FindAsync([request.CartItemId], cancellationToken);
 

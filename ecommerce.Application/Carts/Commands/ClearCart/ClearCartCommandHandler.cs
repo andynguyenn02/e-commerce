@@ -10,8 +10,7 @@ public class ClearCartCommandHandler(IAppDbContext context, ICurrentUser current
 {
     public async Task Handle(ClearCartCommand request, CancellationToken cancellationToken)
     {
-        if (currentUser.UserId is not { } userId) throw new UnauthorizedAccessException("Unauthorized");
-        var cart = await context.GetOrCreateCart(userId, cancellationToken);
+        var cart = await context.GetOrCreateCart(currentUser.UserId, cancellationToken);
 
         var cartItems = await context.CartItems.Where(i => i.CartId == cart.Id).ToListAsync(cancellationToken);
 

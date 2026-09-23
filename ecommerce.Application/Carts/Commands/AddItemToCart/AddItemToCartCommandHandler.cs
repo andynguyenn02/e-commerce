@@ -11,10 +11,7 @@ public class AddItemToCartCommandHandler(IAppDbContext context, ICurrentUser cur
 {
     public async Task Handle(AddItemToCartCommand request, CancellationToken cancellationToken)
     {
-        if (currentUser.UserId is not { } userId || !currentUser.IsAuthenticated)
-            throw new UnauthorizedAccessException("User is not authenticated");
-
-        var cart = await context.GetOrCreateCart(userId, cancellationToken);
+        var cart = await context.GetOrCreateCart(currentUser.UserId, cancellationToken);
 
         var product = await context.Products.FindAsync([request.ProductId], cancellationToken);
 

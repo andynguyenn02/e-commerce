@@ -10,9 +10,7 @@ public class GetWalletTransactionsQueryHandler(IAppDbContext context, ICurrentUs
     public async Task<List<WalletTransactionDto>> Handle(GetWalletTransactionsQuery request,
         CancellationToken cancellationToken)
     {
-        if (currentUser.UserId is not { } userId) throw new UnauthorizedAccessException("Unauthorized");
-
-        var wallet = await context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId, cancellationToken);
+        var wallet = await context.Wallets.FirstOrDefaultAsync(w => w.UserId == currentUser.UserId, cancellationToken);
 
         if (wallet is null) throw new KeyNotFoundException("Wallet not found");
 

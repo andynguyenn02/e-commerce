@@ -10,15 +10,13 @@ public class GetCurrentBalanceQueryHandler(IAppDbContext context, ICurrentUser c
 {
     public async Task<WalletDto> Handle(GetCurrentBalanceQuery request, CancellationToken cancellationToken)
     {
-        if (currentUser.UserId is not { } userId) throw new UnauthorizedAccessException("Unauthorized");
-
-        var wallet = await context.Wallets.FirstOrDefaultAsync(w => w.UserId == userId, cancellationToken);
+        var wallet = await context.Wallets.FirstOrDefaultAsync(w => w.UserId == currentUser.UserId, cancellationToken);
 
         if (wallet is not null) return new WalletDto(wallet.Id, wallet.Balance);
 
         var newWallet = new WalletEntity
         {
-            UserId = userId,
+            UserId = currentUser.UserId,
             Balance = 1000
         };
 

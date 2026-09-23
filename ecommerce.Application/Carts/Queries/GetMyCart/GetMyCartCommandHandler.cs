@@ -10,10 +10,7 @@ public class GetMyCartCommandHandler(IAppDbContext context, ICurrentUser current
 {
     public async Task<CartDto> Handle(GetMyCartCommand request, CancellationToken cancellationToken)
     {
-        if (currentUser.UserId is not { } userId || !currentUser.IsAuthenticated)
-            throw new UnauthorizedAccessException("User is not authenticated");
-
-        var cart = await context.GetOrCreateCart(userId, cancellationToken);
+        var cart = await context.GetOrCreateCart(currentUser.UserId, cancellationToken);
 
         var cartItems = await context.CartItems
             .Where(ci => ci.CartId == cart.Id && ci.Product != null)
@@ -33,7 +30,7 @@ public class GetMyCartCommandHandler(IAppDbContext context, ICurrentUser current
         {
             CartItems = cartItems,
             TotalPrice = cartItems.Sum(ci => ci.TotalPrice),
-            UserId = userId
+            UserId = currentUser.UserId
         };
     }
 }

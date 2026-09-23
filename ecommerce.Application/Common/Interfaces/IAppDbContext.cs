@@ -1,5 +1,6 @@
 using ecommerce.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ecommerce.Application.Common.Interfaces;
 
@@ -15,6 +16,8 @@ public interface IAppDbContext
     DbSet<UserEntity> Users { get; set; }
     DbSet<WalletEntity> Wallets { get; set; }
     DbSet<WalletTransactionEntity> WalletTransactions { get; set; }
-    
+
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);
+
+    Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken);
 }

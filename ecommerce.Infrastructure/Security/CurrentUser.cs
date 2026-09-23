@@ -16,7 +16,7 @@ public class CurrentUser : ICurrentUser
 
     public bool IsAuthenticated => _user?.Identity?.IsAuthenticated ?? false;
 
-    public Guid? UserId
+    public Guid UserId
     {
         get
         {
@@ -34,12 +34,13 @@ public class CurrentUser : ICurrentUser
         }
     }
 
-    public RoleEnum? Role
+    public RoleEnum Role
     {
         get
         {
             var value = _user?.FindFirst("role")?.Value;
-            return Enum.TryParse<RoleEnum>(value, out var result) ? result : null;
+            Enum.TryParse<RoleEnum>(value, out var result);
+            return result;
         }
     }
 }

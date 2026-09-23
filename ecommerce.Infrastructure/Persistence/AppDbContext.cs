@@ -1,6 +1,7 @@
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ecommerce.Infrastructure.Persistence;
 
@@ -24,12 +25,16 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         return base.SaveChangesAsync(cancellationToken);
     }
 
+    public Task<IDbContextTransaction> BeginTransactionAsync(CancellationToken cancellationToken)
+    {
+        return base.Database.BeginTransactionAsync(cancellationToken);
+    }
+
     public override int SaveChanges()
     {
         ApplyTimeStamp();
         return base.SaveChanges();
     }
-
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
