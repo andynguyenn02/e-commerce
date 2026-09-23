@@ -1,8 +1,8 @@
 using ecommerce.Application.Categories.Commands.CreateCategory;
 using ecommerce.Application.Categories.Commands.DeleteCategory;
 using ecommerce.Application.Categories.Commands.UpdateCategory;
-using ecommerce.Application.Categories.Query;
-using ecommerce.Application.Categories.Query.GetCategoryById;
+using ecommerce.Application.Categories.Queries;
+using ecommerce.Application.Categories.Queries.GetCategoryById;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

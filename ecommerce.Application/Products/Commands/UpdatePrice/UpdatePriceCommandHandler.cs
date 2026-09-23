@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using MediatR;
 
@@ -8,7 +9,7 @@ public class UpdatePriceCommandHandler(IAppDbContext context) : IRequestHandler<
     public async Task<Guid> Handle(UpdatePriceCommand request, CancellationToken cancellationToken)
     {
         var product = await context.Products.FindAsync([request.ProductId], cancellationToken)
-                      ?? throw new KeyNotFoundException("Product not found");
+                      ?? throw new NotFoundException("Product");
 
         product.Price = request.Dto.Price;
 

@@ -15,10 +15,10 @@ public class AddItemToCartCommandHandler(IAppDbContext context, ICurrentUser cur
 
         var product = await context.Products.FindAsync([request.ProductId], cancellationToken);
 
-        if (product == null) throw new KeyNotFoundException("Product not found");
+        if (product == null) throw new NotFoundException("Product");
 
         if (product.AvailableQuantity < request.Quantity)
-            throw new BadRequestException("Not enough available quantity");
+            throw new InsufficientStockException(product.Name, product.AvailableQuantity);
 
 
         context.CartItems.Add(new CartItemEntity

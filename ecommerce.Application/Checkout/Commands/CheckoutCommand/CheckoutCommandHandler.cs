@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
 using MediatR;
@@ -10,21 +11,19 @@ public class CheckoutCommandHandler(IAppDbContext context, ICurrentUser currentU
 {
     public async Task<CheckoutDto> Handle(CheckoutCommand request, CancellationToken cancellationToken)
     {
-        var carts = await context.Carts.FirstOrDefaultAsync(c => c.UserId == currentUser.UserId, cancellationToken);
-
         var itemsInCart = await context.CartItems
             .Include(ci => ci.Product)
-            .Where(ci => request.CartItemId.Contains(ci.Id))
+            .Where(ci => request.CartItemId.Contains(ci.Id) && ci.Cart!.UserId == currentUser.UserId)
             .ToListAsync(cancellationToken);
 
-        if (itemsInCart.Count == 0) throw new InvalidOperationException("No items found in cart");
+        if (itemsInCart.Count == 0) throw new EmptyCartException();
 
         decimal totalPriceForOrder = 0;
 
         foreach (var item in itemsInCart)
         {
             if (item.Quantity > item.Product!.AvailableQuantity)
-                throw new InvalidOperationException($"{item.Product.Name}: only {item.Product.AvailableQuantity} left");
+                throw new InsufficientStockException(item.Product.Name, item.Product.AvailableQuantity);
 
             totalPriceForOrder += item.Quantity * item.Product!.Price;
         }
@@ -32,53 +31,44 @@ public class CheckoutCommandHandler(IAppDbContext context, ICurrentUser currentU
         var wallet =
             await context.Wallets.FirstOrDefaultAsync(w => w.UserId == currentUser.UserId, cancellationToken);
 
-        if (wallet!.Balance < totalPriceForOrder)
-            throw new InvalidOperationException($"Need {totalPriceForOrder}, have {wallet.Balance}");
+        if (wallet is null) throw new NotFoundException("Wallet");
+
+        if (wallet.Balance < totalPriceForOrder)
+            throw new InsufficientBalanceException(totalPriceForOrder, wallet.Balance);
 
         var order = new OrderEntity
         {
             UserId = currentUser.UserId
         };
-        await using var transaction = await context.BeginTransactionAsync(cancellationToken);
-        try
+
+        context.Orders.Add(order);
+
+        wallet.Balance -= totalPriceForOrder;
+
+        foreach (var item in itemsInCart)
         {
-            context.Orders.Add(order);
-
-            wallet.Balance -= totalPriceForOrder;
-
-            foreach (var item in itemsInCart)
-            {
-                context.OrderItems.Add(new OrderItemEntity
-                {
-                    OrderId = order.Id,
-                    ProductId = item.ProductId,
-                    Quantity = item.Quantity,
-                    PriceAtPurchased = item.Product!.Price
-                });
-
-                item.Product!.AvailableQuantity -= item.Quantity;
-            }
-
-            context.WalletTransactions.Add(new WalletTransactionEntity
+            context.OrderItems.Add(new OrderItemEntity
             {
                 OrderId = order.Id,
-                WalletId = wallet.Id,
-                Amount = -totalPriceForOrder
+                ProductId = item.ProductId,
+                Quantity = item.Quantity,
+                PriceAtPurchased = item.Product.Price
             });
 
-            context.CartItems.RemoveRange(itemsInCart);
-
-            await context.SaveChangesAsync(cancellationToken);
-            await transaction.CommitAsync(cancellationToken);
-
-            return new CheckoutDto(order.Id, totalPriceForOrder, wallet.Balance);
+            item.Product!.AvailableQuantity -= item.Quantity;
         }
 
-        catch (Exception e)
+        context.WalletTransactions.Add(new WalletTransactionEntity
         {
-            Console.WriteLine(e);
-            await transaction.RollbackAsync(cancellationToken);
-            throw;
-        }
+            OrderId = order.Id,
+            WalletId = wallet.Id,
+            Amount = -totalPriceForOrder
+        });
+
+        context.CartItems.RemoveRange(itemsInCart);
+
+        await context.SaveChangesAsync(cancellationToken);
+
+        return new CheckoutDto(order.Id, totalPriceForOrder, wallet.Balance);
     }
 }

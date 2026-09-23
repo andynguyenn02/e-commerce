@@ -1,8 +1,9 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerce.Application.Categories.Query.GetCategoryById;
+namespace ecommerce.Application.Categories.Queries.GetCategoryById;
 
 public class GetCategoryByIdQueryHandler(IAppDbContext context)
     : IRequestHandler<GetCategoryByIdQuery, GetCategoryByIdDto>
@@ -12,7 +13,7 @@ public class GetCategoryByIdQueryHandler(IAppDbContext context)
         var exist = await context.Categories.FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
 
         return exist is null
-            ? throw new KeyNotFoundException("Category not found")
+            ? throw new NotFoundException("Category")
             : new GetCategoryByIdDto(exist.Id, exist.Name);
     }
 }

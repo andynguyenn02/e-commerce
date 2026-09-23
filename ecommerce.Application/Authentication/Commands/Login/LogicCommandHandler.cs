@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -11,10 +12,10 @@ public class LogicCommandHandler(IAppDbContext context, IPasswordHasher hasher, 
     {
         var user = await context.Users.FirstOrDefaultAsync(u => u.UserName == request.Username, cancellationToken);
 
-        if (user == null) throw new UnauthorizedAccessException("Username or password is incorrect");
+        if (user == null) throw new InvalidCredentialsException();
 
         if (!hasher.VerifyHash(user.PasswordHash, request.Password))
-            throw new UnauthorizedAccessException("Username or password is incorrect");
+            throw new InvalidCredentialsException();
 
         var token = jwtService.GenerateToken(user.Id, user.UserName, user.Role.ToString());
 

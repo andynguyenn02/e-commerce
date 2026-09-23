@@ -14,15 +14,15 @@ public class UpdateCartItemQuantityCommandHandler(IAppDbContext context, ICurren
 
         var cartItem = await context.CartItems.FindAsync([request.CartItemId], cancellationToken);
 
-        if (cartItem == null) throw new KeyNotFoundException("Cart item not found");
+        if (cartItem == null) throw new NotFoundException("Cart item");
 
         var product = await context.Products.FindAsync([cartItem.ProductId], cancellationToken);
 
-        if (cartItem.CartId != userCart.Id) throw new KeyNotFoundException("Cart not found");
-        if (product is null) throw new KeyNotFoundException("Product not found");
+        if (cartItem.CartId != userCart.Id) throw new NotFoundException("Cart item");
+        if (product is null) throw new NotFoundException("Product");
 
         if (product.AvailableQuantity < request.Dto.Quantity)
-            throw new BadRequestException("Not enough available quantity");
+            throw new InsufficientStockException(product.Name, product.AvailableQuantity);
 
 
         cartItem.Quantity = request.Dto.Quantity;

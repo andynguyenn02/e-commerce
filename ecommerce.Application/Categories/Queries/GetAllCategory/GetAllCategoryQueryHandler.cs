@@ -2,7 +2,7 @@ using ecommerce.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
-namespace ecommerce.Application.Categories.Query;
+namespace ecommerce.Application.Categories.Queries;
 
 public class GetAllCategoryQueryHandler(IAppDbContext context)
     : IRequestHandler<GetAllCategoryQuery, List<GetAllCategoryDto>>

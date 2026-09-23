@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using MediatR;
 
@@ -9,10 +10,10 @@ public class UpdateProductCommandHandler(IAppDbContext appDbContext)
     public async Task Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
         var category = await appDbContext.Categories.FindAsync([request.Product.CategoryId], cancellationToken)
-                       ?? throw new KeyNotFoundException("Category not available");
+                       ?? throw new NotFoundException("Category");
 
         var product = await appDbContext.Products.FindAsync([request.ProductId], cancellationToken)
-                      ?? throw new KeyNotFoundException("Product not found");
+                      ?? throw new NotFoundException("Product");
 
         product.Name = request.Product.Name;
         product.Price = request.Product.Price;

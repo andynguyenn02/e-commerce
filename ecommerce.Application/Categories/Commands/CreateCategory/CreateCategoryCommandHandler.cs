@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
 using MediatR;
@@ -12,7 +13,7 @@ public class CreateCategoryCommandHandler(IAppDbContext context) : IRequestHandl
         var exist = await context.Categories.FirstOrDefaultAsync(c => c.Name == request.Name, cancellationToken);
 
         if (exist is not null)
-            throw new InvalidOperationException("Category with this name already exist");
+            throw new CategoryAlreadyExistsException(request.Name);
 
         var category = new CategoryEntity { Name = request.Name };
 

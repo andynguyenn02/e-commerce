@@ -1,4 +1,3 @@
-using System.Text.Json;
 using ecommerce.Application.Common.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
@@ -6,39 +5,39 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ecommerce.Api;
 
-public class GlobalExceptionHandler : IExceptionHandler
+public class GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext context, Exception exception, CancellationToken ct)
     {
-        var status = exception switch
+        var (statusCode, title) = exception switch
         {
+            // business errors (specific types before the BusinessException base)
+            NotFoundException => (StatusCodes.Status404NotFound, "Resource not found"),
+            ConflictException => (StatusCodes.Status409Conflict, "Conflict"),
+            InvalidCredentialsException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
+            BusinessException => (StatusCodes.Status400BadRequest, "Business rule violated"),
+
             // 400
             ValidationException => (StatusCodes.Status400BadRequest, "Validation failed"),
-            BadRequestException => (StatusCodes.Status400BadRequest, "Bad request"),
             BadHttpRequestException e => (e.StatusCode, "Bad request"), // body/JSON sai format
-            JsonException => (StatusCodes.Status400BadRequest, "Invalid JSON"),
-            FormatException => (StatusCodes.Status400BadRequest, "Invalid format"),
-            ArgumentException => (StatusCodes.Status400BadRequest, "Invalid argument"),
-
-            // 401 / 403
-            UnauthorizedAccessException => (StatusCodes.Status401Unauthorized, "Unauthorized"),
-
-            // 404
-            KeyNotFoundException => (StatusCodes.Status404NotFound, "Resource not found"),
 
             // 409
             DbUpdateConcurrencyException => (StatusCodes.Status409Conflict, "Data was modified by another user"),
-            InvalidOperationException => (StatusCodes.Status409Conflict, "Data already exists"),
 
-            // 5xx
-            NotImplementedException => (StatusCodes.Status501NotImplemented, "Not implemented"),
-            TimeoutException => (StatusCodes.Status504GatewayTimeout, "Request timed out"),
             _ => (StatusCodes.Status500InternalServerError, "Internal server error")
         };
 
-        context.Response.StatusCode = status.Item1;
-        await context.Response.WriteAsJsonAsync(new { error = exception.Message }, ct);
+        // only our own exceptions carry messages that are safe to show the client
+        var message = exception is BusinessException or ValidationException ? exception.Message : title;
+        var code = (exception as BusinessException)?.Code;
+
+        if (statusCode >= StatusCodes.Status500InternalServerError)
+            logger.LogError(exception, "Unhandled exception for {Method} {Path}",
+                context.Request.Method, context.Request.Path);
+
+        context.Response.StatusCode = statusCode;
+        await context.Response.WriteAsJsonAsync(new { error = message, code }, ct);
         return true;
     }
 }

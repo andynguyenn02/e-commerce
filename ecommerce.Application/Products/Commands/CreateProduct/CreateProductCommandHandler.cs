@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
 using MediatR;
@@ -10,7 +11,7 @@ public class CreateProductCommandHandler(
     public async Task<Guid> Handle(CreateProductCommand request, CancellationToken cancellationToken)
     {
         var category = await appDbContext.Categories.FindAsync([request.CategoryId], cancellationToken)
-                       ?? throw new KeyNotFoundException("Categories invalid");
+                       ?? throw new NotFoundException("Category");
 
         var product = new ProductEntity
         {

@@ -22,6 +22,7 @@
 
     <ItemGroup>
         <Folder Include="Checkout\Queries\"/>
+        <Folder Include="Orders\Commands\"/>
         <Folder Include="Wallets\Commands\"/>
     </ItemGroup>
 </Project>

@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -12,7 +13,7 @@ public class GetWalletTransactionsQueryHandler(IAppDbContext context, ICurrentUs
     {
         var wallet = await context.Wallets.FirstOrDefaultAsync(w => w.UserId == currentUser.UserId, cancellationToken);
 
-        if (wallet is null) throw new KeyNotFoundException("Wallet not found");
+        if (wallet is null) throw new NotFoundException("Wallet");
 
         var walletTransactions = await context.WalletTransactions.Where(wt => wt.WalletId == wallet.Id)
             .Select(wt => new WalletTransactionDto(wt.Id, wt.OrderId, wt.Amount, wt.CreatedAt))

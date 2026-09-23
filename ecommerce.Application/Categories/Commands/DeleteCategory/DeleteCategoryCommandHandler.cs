@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
@@ -10,7 +11,7 @@ public class DeleteCategoryCommandHandler(IAppDbContext context) : IRequestHandl
     {
         var exist = await context.Categories.FirstOrDefaultAsync(c => c.Id == request.Id, cancellationToken);
 
-        if (exist is null) throw new KeyNotFoundException("Category not exist");
+        if (exist is null) throw new NotFoundException("Category");
 
         context.Categories.Remove(exist);
         await context.SaveChangesAsync(cancellationToken);

@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Extensions;
 using ecommerce.Application.Common.Interfaces;
 using MediatR;
@@ -13,9 +14,9 @@ public class RemoveCartItemCommandHandler(IAppDbContext context, ICurrentUser cu
 
         var cartItem = await context.CartItems.FindAsync([request.CartItemId], cancellationToken);
 
-        if (cartItem == null) throw new KeyNotFoundException("Cart item not found");
+        if (cartItem == null) throw new NotFoundException("Cart item");
 
-        if (cartItem.CartId != userCart.Id) throw new KeyNotFoundException("Cart not found");
+        if (cartItem.CartId != userCart.Id) throw new NotFoundException("Cart item");
 
         context.CartItems.Remove(cartItem);
 

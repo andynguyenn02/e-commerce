@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
 using ecommerce.Domain.Enums;
@@ -13,7 +14,7 @@ public class RegisterCommandHandler(IAppDbContext context, IPasswordHasher passw
     {
         var exist = await context.Users.FirstOrDefaultAsync(u => u.UserName == request.Username, cancellationToken);
         if (exist is not null)
-            throw new InvalidOperationException("Username already exists");
+            throw new UsernameAlreadyExistsException(request.Username);
 
         var user = new UserEntity
         {

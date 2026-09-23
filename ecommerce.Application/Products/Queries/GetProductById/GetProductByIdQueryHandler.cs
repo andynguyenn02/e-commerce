@@ -1,3 +1,4 @@
+using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using MediatR;
 
@@ -9,7 +10,7 @@ public class GetProductByIdQueryHandler(IAppDbContext appDbContext)
     public async Task<ProductDto> Handle(GetProductByIdQuery request, CancellationToken cancellationToken)
     {
         var product = await appDbContext.Products.FindAsync([request.ProductId], cancellationToken)
-                      ?? throw new KeyNotFoundException("Product with this id not found");
+                      ?? throw new NotFoundException("Product");
 
         return new ProductDto(
             product.Id, product.Name, product.Price,
