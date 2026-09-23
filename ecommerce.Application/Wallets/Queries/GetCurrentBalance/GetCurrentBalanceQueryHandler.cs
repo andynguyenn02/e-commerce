@@ -22,6 +22,6 @@ public class GetCurrentBalanceQueryHandler(IAppDbContext context, ICurrentUser c
 
         context.Wallets.Add(newWallet);
         await context.SaveChangesAsync(cancellationToken);
-        return new WalletDto(newWallet.UserId, newWallet.Balance);
+        return new WalletDto(newWallet.Id, newWallet.Balance);
     }
 }
