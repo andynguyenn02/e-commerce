@@ -21,4 +21,10 @@
         <ProjectReference Include="..\ecommerce.Infrastructure\ecommerce.Infrastructure.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+        <Folder Include="Storage\Archive\"/>
+        <Folder Include="Storage\Failed\"/>
+        <Folder Include="Storage\Uploads\"/>
+    </ItemGroup>
+
 </Project>
