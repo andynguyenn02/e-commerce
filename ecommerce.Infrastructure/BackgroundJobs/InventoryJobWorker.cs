@@ -13,6 +13,7 @@ public class InventoryJobWorker(
     IServiceScopeFactory scopeFactory,
     IFileStorage fileStorage,
     IEnumerable<IInventoryFileReader> fileReaders,
+    IEmailJobQueue emailJobQueue,
     ILogger<InventoryJobWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -64,6 +65,10 @@ public class InventoryJobWorker(
                 job.Status = InventoryJobStatusEnum.Accepted;
                 fileStorage.MoveToArchive(job.StoredFileName);
                 await service.SaveChangesAsync(stoppingToken);
+
+                // Enqueue upload notification email after successful processing
+                var adminUser = await service.Users.FirstAsync(u => u.Id == job.UserId, stoppingToken);
+                await emailJobQueue.PushToQueue(EmailTypeEnum.Upload, job.Id, adminUser.UserName, stoppingToken);
             }
             catch (Exception e)
             {

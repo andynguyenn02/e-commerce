@@ -1,5 +1,6 @@
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Infrastructure.BackgroundJobs;
+using ecommerce.Infrastructure.Email;
 using ecommerce.Infrastructure.Jobs;
 using ecommerce.Infrastructure.Persistence;
 using ecommerce.Infrastructure.Security;
@@ -24,11 +25,14 @@ public static class DependencyInjection
         services.AddSingleton<IPasswordHasher, PasswordHasher>();
         services.AddSingleton<IJwtService, JwtService>();
         services.AddSingleton<IInventoryJobQueue, InventoryJobQueue>();
+        services.AddSingleton<IEmailJobQueue, EmailJobJobQueue>();
+        services.AddSingleton<IEmailSender, SmtpEmailSender>();
         services.AddSingleton<IFileStorage, LocalFileStorage>();
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.Section));
         services.Configure<StorageSettings>(configuration.GetSection(StorageSettings.Section));
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddHostedService<InventoryJobWorker>();
+        services.AddHostedService<EmailJobWorker>();
 
         //file reader
         services.AddSingleton<IInventoryFileReader, CsvInventoryFileReader>();

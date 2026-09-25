@@ -1,12 +1,16 @@
 using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
+using ecommerce.Domain.Enums;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 
 namespace ecommerce.Application.Checkout.Commands.CheckoutCommand;
 
-public class CheckoutCommandHandler(IAppDbContext context, ICurrentUser currentUser)
+public class CheckoutCommandHandler(
+    IAppDbContext context,
+    ICurrentUser currentUser,
+    IEmailJobQueue emailJobQueue)
     : IRequestHandler<CheckoutCommand, CheckoutDto>
 {
     public async Task<CheckoutDto> Handle(
@@ -81,6 +85,10 @@ public class CheckoutCommandHandler(IAppDbContext context, ICurrentUser currentU
         context.CartItems.RemoveRange(itemsInCart);
 
         await context.SaveChangesAsync(cancellationToken);
+
+        // Enqueue email AFTER commit — never inside the transaction
+        var user = await context.Users.FirstAsync(u => u.Id == currentUser.UserId, cancellationToken);
+        await emailJobQueue.PushToQueue(EmailTypeEnum.Checkout, order.Id, user.UserName, cancellationToken);
 
         return new CheckoutDto(order.Id, totalPriceForOrder, wallet.Balance);
     }
