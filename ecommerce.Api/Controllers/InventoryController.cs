@@ -11,7 +11,7 @@ namespace ecommerce.Api.Controllers;
 public class InventoryController(ISender sender) : ControllerBase
 {
     [Authorize(Policy = "Admin")]
-    [HttpGet]
+    [HttpGet("jobs")]
     public async Task<IActionResult> GetAllInventoryJob(CancellationToken ct)
     {
         var list = await sender.Send(new GetJobListQuery(), ct);
@@ -20,13 +20,13 @@ public class InventoryController(ISender sender) : ControllerBase
     }
 
     [Authorize(Policy = "Admin")]
-    [HttpPost]
+    [HttpPost("job")]
     public async Task<IActionResult> UploadFile(IFormFile formFile, CancellationToken ct)
     {
         await using var stream = formFile.OpenReadStream();
 
         await sender.Send(new UploadCommand(stream, formFile.FileName), ct);
 
-        return Ok();
+        return Created();
     }
 }

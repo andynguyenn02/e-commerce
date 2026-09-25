@@ -30,6 +30,10 @@ public static class DependencyInjection
         services.AddScoped<ICurrentUser, CurrentUser>();
         services.AddHostedService<InventoryJobWorker>();
 
+        //file reader
+        services.AddSingleton<IInventoryFileReader, CsvInventoryFileReader>();
+        services.AddSingleton<IInventoryFileReader, ExcelInventoryFileReader>();
+
         return services;
     }
 }
