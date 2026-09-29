@@ -25,8 +25,9 @@ public class InventoryController(ISender sender) : ControllerBase
     {
         await using var stream = formFile.OpenReadStream();
 
-        await sender.Send(new UploadCommand(stream, formFile.FileName), ct);
+        var jobId = await sender.Send(new UploadCommand(stream, formFile.FileName), ct);
 
-        return Created();
+        // job is processed in the background; client polls GET jobs for status
+        return Accepted(new { jobId });
     }
 }

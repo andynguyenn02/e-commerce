@@ -1,10 +1,12 @@
 using ecommerce.Application.Orders.Queries.GetOrderDetail;
 using ecommerce.Application.Orders.Queries.GetOrderSummary;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ecommerce.Api.Controllers;
 
+[Authorize(Policy = "Customer")]
 [ApiController]
 [Route("api/[controller]")]
 public class OrderController(ISender sender) : ControllerBase

@@ -4,10 +4,12 @@ using ecommerce.Application.Carts.Commands.RemoveCartItem;
 using ecommerce.Application.Carts.Commands.UpdateCartItemQuantity;
 using ecommerce.Application.Carts.Queries.GetMyCart;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ecommerce.Api.Controllers;
 
+[Authorize(Policy = "Customer")]
 [ApiController]
 [Route("api/[controller]")]
 public class CartController(ISender sender) : ControllerBase

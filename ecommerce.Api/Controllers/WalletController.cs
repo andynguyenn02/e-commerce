@@ -1,10 +1,12 @@
 using ecommerce.Application.Wallets.Queries.GetCurrentBalance;
 using ecommerce.Application.Wallets.Queries.GetWalletTransactions;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ecommerce.Api.Controllers;
 
+[Authorize(Policy = "Customer")]
 [ApiController]
 [Route("api/[controller]")]
 public class WalletController(ISender sender) : ControllerBase

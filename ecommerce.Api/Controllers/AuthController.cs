@@ -1,28 +1,32 @@
 using System.Security.Claims;
 using ecommerce.Application.Authentication.Commands.Login;
 using ecommerce.Application.Authentication.Commands.Register;
+using ecommerce.Infrastructure.Security;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace ecommerce.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController(ISender sender) : ControllerBase
+public class AuthController(ISender sender, IOptions<JwtSettings> jwt) : ControllerBase
 {
+    private readonly JwtSettings _jwt = jwt.Value;
+
     [AllowAnonymous]
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginCommand request, CancellationToken ct)
     {
         var token = await sender.Send(request, ct);
 
-        Response.Cookies.Append("access_token", token, new CookieOptions
+        Response.Cookies.Append(_jwt.CookieName, token, new CookieOptions
         {
             HttpOnly = true,
-            Secure = true,
-            SameSite = SameSiteMode.Strict,
-            Expires = DateTimeOffset.UtcNow.AddMinutes(15)
+            Secure = false, // dev over HTTP; set true under HTTPS in production
+            SameSite = SameSiteMode.Lax, // allows cross-origin from localhost dev servers
+            Expires = DateTimeOffset.UtcNow.AddMinutes(_jwt.ExpiryMinutes) // keep cookie and JWT lifetime in sync
         });
 
         return Ok();
@@ -39,7 +43,7 @@ public class AuthController(ISender sender) : ControllerBase
     [HttpPost("logout")]
     public IActionResult Logout(CancellationToken ct)
     {
-        Response.Cookies.Delete("access_token");
+        Response.Cookies.Delete(_jwt.CookieName);
         return NoContent();
     }
 
