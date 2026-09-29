@@ -2,6 +2,7 @@ using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecommerce.Application.Products.Commands.CreateProduct;
 
@@ -12,6 +13,10 @@ public class CreateProductCommandHandler(
     {
         var category = await appDbContext.Categories.FindAsync([request.CategoryId], cancellationToken)
                        ?? throw new NotFoundException("Category");
+
+        // Unique index on Code would otherwise surface as a 500
+        if (await appDbContext.Products.AnyAsync(p => p.Code == request.Code, cancellationToken))
+            throw new ProductCodeAlreadyExistsException(request.Code);
 
         var product = new ProductEntity
         {

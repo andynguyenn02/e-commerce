@@ -1,6 +1,7 @@
 using ecommerce.Application.Common.Exceptions;
 using ecommerce.Application.Common.Interfaces;
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 
 namespace ecommerce.Application.Products.Commands.UpdateProduct;
 
@@ -14,6 +15,11 @@ public class UpdateProductCommandHandler(IAppDbContext appDbContext)
 
         var product = await appDbContext.Products.FindAsync([request.ProductId], cancellationToken)
                       ?? throw new NotFoundException("Product");
+
+        // Unique index on Code would otherwise surface as a 500
+        if (await appDbContext.Products.AnyAsync(
+                p => p.Code == request.Product.Code && p.Id != request.ProductId, cancellationToken))
+            throw new ProductCodeAlreadyExistsException(request.Product.Code);
 
         product.Name = request.Product.Name;
         product.Price = request.Product.Price;

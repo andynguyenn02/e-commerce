@@ -1,0 +1,12 @@
+**/bin
+**/obj
+**/node_modules
+ecommerce.Web
+ecommerce.Api/Storage
+.git
+.idea
+.vscode
+.claude
+**/*.user
+**/*.DotSettings.user
+.env
