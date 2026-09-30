@@ -72,6 +72,10 @@ public class InventoryJobWorker(
             }
             catch (Exception e)
             {
+                // clear all tracker 
+                service.ChangeTracker.Clear();
+                // re-attach job for update
+                service.InventoryJobs.Attach(job);
                 job.Status = InventoryJobStatusEnum.Failed;
                 job.ErrorMessage = e.Message;
 

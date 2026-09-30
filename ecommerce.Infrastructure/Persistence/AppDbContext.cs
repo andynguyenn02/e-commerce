@@ -1,6 +1,7 @@
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ecommerce.Infrastructure.Persistence;
@@ -18,6 +19,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<WalletEntity> Wallets { get; set; }
     public DbSet<WalletTransactionEntity> WalletTransactions { get; set; }
+    public ChangeTracker ChangeTracker { get; }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
