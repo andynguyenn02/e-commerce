@@ -22,7 +22,7 @@ public class UpdateCategoryCommandHandler(IAppDbContext context)
             throw new NotFoundException("Category");
 
         var checkName = await context.Categories.FirstOrDefaultAsync(
-            c => c.Name == request.dto.Name,
+            c => c.Name == request.dto.Name && c.Id != request.Id,
             cancellationToken
         );
 

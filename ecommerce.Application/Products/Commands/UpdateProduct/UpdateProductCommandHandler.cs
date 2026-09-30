@@ -22,9 +22,9 @@ public class UpdateProductCommandHandler(IAppDbContext appDbContext)
             throw new ProductCodeAlreadyExistsException(request.Product.Code);
 
         product.Name = request.Product.Name;
-        product.Price = request.Product.Price;
+        product.SetPrice(request.Product.Price);
         product.Code = request.Product.Code;
-        product.AvailableQuantity = request.Product.AvailableQuantity;
+        product.SetStock(request.Product.AvailableQuantity);
         product.CategoryId = category.Id;
 
         await appDbContext.SaveChangesAsync(cancellationToken);

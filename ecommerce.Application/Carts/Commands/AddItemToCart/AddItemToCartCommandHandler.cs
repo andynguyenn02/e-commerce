@@ -27,7 +27,7 @@ public class AddItemToCartCommandHandler(IAppDbContext context, ICurrentUser cur
 
         var existingQuantity = cartItem?.Quantity ?? 0;
 
-        if (product.AvailableQuantity < existingQuantity + request.Quantity)
+        if (!product.HasStockFor(existingQuantity + request.Quantity))
             throw new InsufficientStockException(product.Name, product.AvailableQuantity);
 
         if (cartItem is null)
@@ -43,7 +43,7 @@ public class AddItemToCartCommandHandler(IAppDbContext context, ICurrentUser cur
         }
         else
         {
-            cartItem.Quantity += request.Quantity;
+            cartItem.AddQuantity(request.Quantity);
         }
         await context.SaveChangesAsync(cancellationToken);
     }

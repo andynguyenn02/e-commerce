@@ -21,11 +21,7 @@ public class DeleteCategoryCommandHandler(IAppDbContext context)
         if (exist is null)
             throw new NotFoundException("Category");
 
-        var products = await context
-            .Products.Where(p => p.CategoryId == exist.Id)
-            .ToListAsync(cancellationToken);
-
-        if (products.Count != 0)
+        if (await context.Products.AnyAsync(p => p.CategoryId == exist.Id, cancellationToken))
             throw new CategoryHasProductException(exist.Name);
 
         context.Categories.Remove(exist);

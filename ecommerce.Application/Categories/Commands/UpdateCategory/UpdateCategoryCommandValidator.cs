@@ -7,6 +7,6 @@ public class UpdateCategoryCommandValidator : AbstractValidator<UpdateCategoryCo
     public UpdateCategoryCommandValidator()
     {
         RuleFor(x => x.Id).NotEmpty().NotNull().WithMessage("Id cannot be empty");
-        RuleFor(x => x.dto.Name).MinimumLength(4).NotEmpty().NotNull().WithMessage("Name cannot be empty");
+        RuleFor(x => x.dto.Name).NotEmpty().NotNull().WithMessage("Name cannot be empty");
     }
 }

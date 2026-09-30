@@ -11,7 +11,7 @@ public class UpdatePriceCommandHandler(IAppDbContext context) : IRequestHandler<
         var product = await context.Products.FindAsync([request.ProductId], cancellationToken)
                       ?? throw new NotFoundException("Product");
 
-        product.Price = request.Dto.Price;
+        product.SetPrice(request.Dto.Price);
 
         await context.SaveChangesAsync(cancellationToken);
 

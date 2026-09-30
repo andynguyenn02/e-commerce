@@ -80,8 +80,6 @@ public class EmailJobWorker(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to send checkout email for order {OrderId}", orderId);
-            order.EmailSentAt = null;
-            await context.SaveChangesAsync(ct);
         }
     }
 
@@ -116,8 +114,6 @@ public class EmailJobWorker(
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to send upload email for inventory job {JobId}", jobId);
-            inventoryJob.EmailSentAt = null;
-            await context.SaveChangesAsync(ct);
         }
     }
 }

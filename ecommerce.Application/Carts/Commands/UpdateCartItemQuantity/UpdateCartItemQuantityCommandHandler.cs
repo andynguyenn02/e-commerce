@@ -21,11 +21,11 @@ public class UpdateCartItemQuantityCommandHandler(IAppDbContext context, ICurren
         if (cartItem.CartId != userCart.Id) throw new NotFoundException("Cart item");
         if (product is null) throw new NotFoundException("Product");
 
-        if (product.AvailableQuantity < request.Dto.Quantity)
+        if (!product.HasStockFor(request.Dto.Quantity))
             throw new InsufficientStockException(product.Name, product.AvailableQuantity);
 
 
-        cartItem.Quantity = request.Dto.Quantity;
+        cartItem.SetQuantity(request.Dto.Quantity);
 
         await context.SaveChangesAsync(cancellationToken);
     }

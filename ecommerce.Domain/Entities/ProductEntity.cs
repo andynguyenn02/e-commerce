@@ -11,4 +11,25 @@ public class ProductEntity : CommonEntity
     public CategoryEntity? Category { get; set; }
 
     public required bool IsDeleted { get; set; }
+
+    public bool HasStockFor(int quantity) => AvailableQuantity >= quantity;
+
+    public void SetPrice(decimal price)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegativeOrZero(price);
+        Price = price;
+    }
+
+    public void SetStock(int quantity)
+    {
+        ArgumentOutOfRangeException.ThrowIfNegative(quantity);
+        AvailableQuantity = quantity;
+    }
+
+    public void RemoveStock(int quantity)
+    {
+        if (!HasStockFor(quantity))
+            throw new InvalidOperationException($"Insufficient stock for {Name}");
+        AvailableQuantity -= quantity;
+    }
 }

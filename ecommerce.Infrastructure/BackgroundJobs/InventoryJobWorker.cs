@@ -58,8 +58,15 @@ public class InventoryJobWorker(
                                   ?? throw new Exception(
                                       $"Row {row.RowNumber}: product with code {row.Code} does not exist");
 
-                    product.AvailableQuantity = quantityValue;
-                    product.Price = priceValue;
+                    try
+                    {
+                        product.SetStock(quantityValue);
+                        product.SetPrice(priceValue);
+                    }
+                    catch (ArgumentOutOfRangeException e)
+                    {
+                        throw new Exception($"Row {row.RowNumber}: {e.Message}", e);
+                    }
                 }
 
                 job.Status = InventoryJobStatusEnum.Accepted;

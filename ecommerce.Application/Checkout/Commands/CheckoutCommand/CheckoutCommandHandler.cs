@@ -28,11 +28,23 @@ public class CheckoutCommandHandler(
         if (itemsInCart.Count == 0)
             throw new EmptyCartException();
 
+        var unavailableIds = itemsInCart.Where(i => i.Product is null).Select(i => i.ProductId).ToList();
+
+        if (unavailableIds.Count != 0)
+        {
+            var names = await context.Products.IgnoreQueryFilters()
+                .Where(p => unavailableIds.Contains(p.Id))
+                .Select(p => p.Name)
+                .ToListAsync(cancellationToken);
+
+            throw new ProductNoLongerAvailableException(names);
+        }
+
         decimal totalPriceForOrder = 0;
 
         foreach (var item in itemsInCart)
         {
-            if (item.Quantity > item.Product!.AvailableQuantity)
+            if (!item.Product!.HasStockFor(item.Quantity))
                 throw new InsufficientStockException(
                     item.Product.Name,
                     item.Product.AvailableQuantity
@@ -49,14 +61,14 @@ public class CheckoutCommandHandler(
         if (wallet is null)
             throw new NotFoundException("Wallet");
 
-        if (wallet.Balance < totalPriceForOrder)
+        if (!wallet.IsSufficientBalance(totalPriceForOrder))
             throw new InsufficientBalanceException(totalPriceForOrder, wallet.Balance);
 
         var order = new OrderEntity { UserId = currentUser.UserId };
 
         context.Orders.Add(order);
 
-        wallet.Balance -= totalPriceForOrder;
+        wallet.WithDraw(totalPriceForOrder);
 
         foreach (var item in itemsInCart)
         {
@@ -66,11 +78,11 @@ public class CheckoutCommandHandler(
                     OrderId = order.Id,
                     ProductId = item.ProductId,
                     Quantity = item.Quantity,
-                    PriceAtPurchased = item.Product!.Price,
+                    PriceAtPurchased = item.Product!.Price
                 }
             );
 
-            item.Product!.AvailableQuantity -= item.Quantity;
+            item.Product!.RemoveStock(item.Quantity);
         }
 
         context.WalletTransactions.Add(
@@ -78,7 +90,7 @@ public class CheckoutCommandHandler(
             {
                 OrderId = order.Id,
                 WalletId = wallet.Id,
-                Amount = -totalPriceForOrder,
+                Amount = -totalPriceForOrder
             }
         );
 

@@ -18,7 +18,6 @@ public class GetOrderDetailQueryHandler(IAppDbContext context, ICurrentUser curr
 
         var orderItems = await context.OrderItems
             .Where(oi => oi.OrderId == request.OrderId)
-            .Include(oi => oi.Product)
             .Select(oi => new OrderItemDto
             {
                 OrderItemId = oi.Id,

@@ -7,6 +7,6 @@ public class UpdateCartItemQuantityValidator : AbstractValidator<UpdateCartItemQ
     public UpdateCartItemQuantityValidator()
     {
         RuleFor(x => x.CartItemId).NotEmpty().NotNull();
-        RuleFor(x => x.Dto.Quantity).NotEmpty().NotEmpty().GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Dto.Quantity).GreaterThan(0);
     }
 }

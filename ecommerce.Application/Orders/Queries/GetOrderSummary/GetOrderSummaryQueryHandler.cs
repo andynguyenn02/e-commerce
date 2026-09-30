@@ -15,11 +15,10 @@ public class GetOrderSummaryQueryHandler(IAppDbContext context, ICurrentUser cur
             {
                 OrderId = o.Id,
                 OrderDate = o.CreatedAt,
-                Quantity = context.OrderItems.Count(oi => oi.OrderId == o.Id),
+                Quantity = context.OrderItems.Where(oi => oi.OrderId == o.Id).Sum(oi => oi.Quantity),
                 TotalAmount = context.OrderItems.Where(oi => oi.OrderId == o.Id).Sum(oi => oi.PriceAtPurchased * oi.Quantity)
             })
             .OrderByDescending(o => o.OrderDate)
-            .IgnoreQueryFilters()
             .ToListAsync(cancellationToken);
 
         return orders;
