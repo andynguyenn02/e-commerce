@@ -64,14 +64,25 @@ public class CheckoutCommandHandler(
         if (!wallet.IsSufficientBalance(totalPriceForOrder))
             throw new InsufficientBalanceException(totalPriceForOrder, wallet.Balance);
 
+        await using var transaction = await context.BeginTransactionAsync(cancellationToken);
+
         var order = new OrderEntity { UserId = currentUser.UserId };
 
         context.Orders.Add(order);
 
-        wallet.WithDraw(totalPriceForOrder);
-
-        foreach (var item in itemsInCart)
+        // Fixed lock order (by ProductId) so concurrent checkouts always lock product rows
+        // in the same sequence, preventing deadlocks.
+        foreach (var item in itemsInCart.OrderBy(i => i.ProductId))
         {
+            var productAffectedRow = await context.Products
+                .Where(p => p.Id == item.ProductId && p.AvailableQuantity >= item.Quantity)
+                .ExecuteUpdateAsync(s =>
+                    s.SetProperty(p => p.AvailableQuantity, p => p.AvailableQuantity - item.Quantity)
+                        .SetProperty(p => p.UpdatedAt, DateTime.UtcNow), cancellationToken);
+
+            if (productAffectedRow == 0)
+                throw new InsufficientStockException(item.Product!.Name, item.Product.AvailableQuantity);
+
             context.OrderItems.Add(
                 new OrderItemEntity
                 {
@@ -81,9 +92,15 @@ public class CheckoutCommandHandler(
                     PriceAtPurchased = item.Product!.Price
                 }
             );
-
-            item.Product!.RemoveStock(item.Quantity);
         }
+
+        var walletAffectedRow = await context.Wallets
+            .Where(w => w.Id == wallet.Id && w.Balance >= totalPriceForOrder)
+            .ExecuteUpdateAsync(w =>
+                w.SetProperty(x => x.Balance, x => x.Balance - totalPriceForOrder)
+                    .SetProperty(x => x.UpdatedAt, DateTime.UtcNow), cancellationToken);
+
+        if (walletAffectedRow == 0) throw new InsufficientBalanceException(totalPriceForOrder, wallet.Balance);
 
         context.WalletTransactions.Add(
             new WalletTransactionEntity
@@ -93,15 +110,19 @@ public class CheckoutCommandHandler(
                 Amount = -totalPriceForOrder
             }
         );
-
         context.CartItems.RemoveRange(itemsInCart);
-
         await context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
 
         // Enqueue email AFTER commit — never inside the transaction
         var user = await context.Users.FirstAsync(u => u.Id == currentUser.UserId, cancellationToken);
         await emailJobQueue.PushToQueue(EmailTypeEnum.Checkout, order.Id, user.UserName, cancellationToken);
 
-        return new CheckoutDto(order.Id, totalPriceForOrder, wallet.Balance);
+        var freshBalance = await context.Wallets
+            .Where(w => w.Id == wallet.Id)
+            .Select(w => w.Balance)
+            .FirstAsync(cancellationToken);
+
+        return new CheckoutDto(order.Id, totalPriceForOrder, freshBalance);
     }
 }

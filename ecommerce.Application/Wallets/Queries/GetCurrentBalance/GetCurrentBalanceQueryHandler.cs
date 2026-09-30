@@ -16,9 +16,9 @@ public class GetCurrentBalanceQueryHandler(IAppDbContext context, ICurrentUser c
 
         var newWallet = new WalletEntity
         {
-            UserId = currentUser.UserId,
-            Balance = 1000
+            UserId = currentUser.UserId
         };
+        newWallet.Deposit(1000);
 
         context.Wallets.Add(newWallet);
         await context.SaveChangesAsync(cancellationToken);

@@ -19,7 +19,6 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
     public DbSet<UserEntity> Users { get; set; }
     public DbSet<WalletEntity> Wallets { get; set; }
     public DbSet<WalletTransactionEntity> WalletTransactions { get; set; }
-    public ChangeTracker ChangeTracker { get; }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
@@ -46,6 +45,7 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
         modelBuilder.Entity<ProductEntity>().HasQueryFilter(p => !p.IsDeleted);
         modelBuilder.Entity<UserEntity>().HasIndex(u => u.UserName).IsUnique();
         modelBuilder.Entity<CartEntity>().HasIndex(c => c.UserId).IsUnique();
+        modelBuilder.Entity<WalletEntity>().HasIndex(w => w.UserId).IsUnique();
         modelBuilder.Entity<WalletTransactionEntity>()
             .HasOne(wt => wt.Order)
             .WithMany()
@@ -62,7 +62,8 @@ public class ApplicationDbContext(DbContextOptions<ApplicationDbContext> options
             switch (entry.State)
             {
                 case EntityState.Added:
-                    entry.Entity.Id = Guid.CreateVersion7();
+                    if (entry.Entity.Id == Guid.Empty)
+                        entry.Entity.Id = Guid.CreateVersion7();
                     entry.Entity.CreatedAt = now;
                     entry.Entity.UpdatedAt = now;
                     break;
