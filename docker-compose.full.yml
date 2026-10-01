@@ -6,7 +6,10 @@
 # Uses the same host ports as the dev stack, so stop that one first
 # (`docker compose down`). Its data lives in its own volume, separate from dev.
 #
-#   FE        http://localhost:5173
+# The FE is same-origin: nginx in the web container proxies /api to the api
+# service, so the browser only ever talks to the FE's own origin.
+#
+#   FE        http://localhost:5173   (API reachable at /api through it)
 #   API       http://localhost:5118   (Swagger: /swagger)
 #   Mail UI   http://localhost:8025
 #   SQL       localhost,1433  (sa / MSSQL_SA_PASSWORD, db EcommerceDb)
@@ -91,11 +94,8 @@ services:
   web:
     build:
       context: ./ecommerce.Web
-      args:
-        # Called by the browser, so it is the host port of the api service.
-        VITE_API_URL: http://localhost:5118
     ports:
-      - "5173:80"   # must stay 5173: the API's CORS policy allows only this origin
+      - "5173:80"
     depends_on:
       - api
     restart: unless-stopped

@@ -2,8 +2,11 @@ import axios, { AxiosError } from 'axios'
 
 // Auth lives in an httpOnly cookie set by the backend, so no component ever
 // touches a token: the browser attaches it because of withCredentials.
+// No baseURL: requests are relative to the page's own origin, so they hit
+// whatever is in front of us (Vite's dev proxy, or nginx in containers).
+// That keeps the cookie first-party and means no build-time URL is baked
+// into the FE image.
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true,
 })
 

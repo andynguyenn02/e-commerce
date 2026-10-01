@@ -5,6 +5,13 @@ import { defineConfig } from 'vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  // backend CORS policy only allows this exact origin
-  server: { port: 5173, strictPort: true },
+  server: {
+    port: 5173,
+    strictPort: true,
+    // FE calls the API with relative paths (no baseURL), so proxy /api to
+    // the API running on the host for `npm run dev`, keeping it same-origin.
+    proxy: {
+      '/api': 'http://localhost:5118',
+    },
+  },
 })

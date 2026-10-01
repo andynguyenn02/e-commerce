@@ -1,6 +1,6 @@
 # Kế hoạch hoàn thiện E-Commerce
 
-**Tổng: ~38 giờ ≈ 4 ngày × 10 giờ**
+**Tổng: ~38 giờ ≈ 4 ngày × 10 giờ** (+ task bổ sung: Row version ~1.5–2h, Deploy ~9–11h)
 
 Làm đúng theo thứ tự số file. Mỗi file là một task độc lập, xong là chạy được và test được ngay.
 
@@ -56,6 +56,13 @@ Không cần sửa gì ở 3 chỗ này. Chỉ cần dùng đúng.
 | [15-polish.md](15-polish.md) | README, CI, dọn cuối | 2 |
 | — | Dự phòng | 2 |
 
+### Bổ sung — Data integrity & Deployment
+
+| File | Task | Giờ |
+|---|---|---|
+| [16-row-version.md](16-row-version.md) | Row version / Optimistic concurrency | 1.5 |
+| [17-k8s-deploy.md](17-k8s-deploy.md) | Deploy to Kubernetes (k3s + Helm) | 9 |
+
 ## Cách dùng
 
 1. Mở đúng **một** file task. Đừng đọc trước file sau.
@@ -84,6 +91,8 @@ Luôn để 2 cửa sổ mở: `dotnet run --project ecommerce.Api` và Swagger 
 - [ ] 13 — Frontend customer
 - [ ] 14 — Frontend admin
 - [ ] 15 — Polish
+- [ ] 16 — Row version / Optimistic concurrency
+- [ ] 17 — Deploy to Kubernetes (k3s + Helm)
 
 ## Quy ước chung cho toàn bộ plan
 

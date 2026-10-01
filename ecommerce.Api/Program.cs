@@ -20,12 +20,17 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddApiAuth();
 
-// CORS for Vite dev server
+// Allowed origins come from config (Cors:AllowedOrigins) instead of a literal,
+// so prod/staging domains don't need an API rebuild to be let in.
+// AllowCredentials() is incompatible with AllowAnyOrigin()/"*" (cookie-based
+// auth needs an explicit origin list) -- a missing/empty config section just
+// means no origin is allowed; never fall back to a wildcard here.
+var allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>() ?? [];
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("ViteDev", policy =>
+    options.AddPolicy("AllowedOrigins", policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -41,7 +46,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseExceptionHandler();
-app.UseCors("ViteDev"); // must be before Authentication/Authorization
+app.UseCors("AllowedOrigins"); // must be before Authentication/Authorization
 app.UseAuthentication();
 app.UseAuthorization();
 

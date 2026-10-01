@@ -27,14 +27,19 @@ services:
 
   # Frontend only; the API runs on the host (Rider / dotnet run) on :5118.
   # Built static bundle, no hot reload: use `npm run dev` for day-to-day FE work.
+  # nginx proxies /api to the host's API via host.docker.internal (API_UPSTREAM
+  # below), since there's no "api" service in this compose file — use
+  # `npm run dev` (its own Vite proxy targets localhost:5118) instead for FE work.
   web:
     build:
       context: ./ecommerce.Web
-      args:
-        VITE_API_URL: http://localhost:5118
     container_name: web-dev
+    environment:
+      API_UPSTREAM: host.docker.internal:5118
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
-      - "5173:80"   # must stay 5173: the API's CORS policy allows only this origin
+      - "5173:80"
     restart: unless-stopped
 
 volumes:
