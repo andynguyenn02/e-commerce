@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: ecommerce
+data:
+  ASPNETCORE_ENVIRONMENT: "Development"
+  Smtp__Host: "mailpit"
+  Smtp__Port: "1025"
+  Cors__AllowedOrigins__0: "http://localhost:8080"

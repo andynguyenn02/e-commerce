@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: db
+  namespace: ecommerce
+spec:
+  replicas: 1
+  # The Deployment owns every pod carrying these labels, which is why
+  # selector.matchLabels must equal template.metadata.labels exactly.
+  selector:
+    matchLabels:
+      app: db
+  template:
+    metadata:
+      labels:
+        app: db
+    spec:
+      containers:
+        - name: db
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          ports:
+            - containerPort: 1433
+          env:
+            - name: ACCEPT_EULA
+              value: "Y"
+            # The password never appears in this file: it is read from the
+            # app-secrets Secret at pod start.
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MSSQL_SA_PASSWORD
+          volumeMounts:
+            - name: db-data
+              mountPath: /var/opt/mssql
+      # The pod declares which storage is available; the container above
+      # says where to mount it. They are linked by the matching name.
+      volumes:
+        - name: db-data
+          persistentVolumeClaim:
+            claimName: db-data

@@ -1,0 +1,24 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ecommerce
+  namespace: ecommerce
+spec:
+  # k3s ships Traefik as its default ingress controller.
+  ingressClassName: traefik
+  rules:
+    # No host: this answers on whatever address reaches the cluster, which
+    # keeps it working against a bare node IP during development. A real
+    # host goes here in Phase 4 when TLS is added.
+    - http:
+        paths:
+          # Only one rule: nginx inside the web pod already proxies /api to
+          # the api Service, so there is nothing for the Ingress to route
+          # to api directly.
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: web
+                port:
+                  number: 80
