@@ -10,15 +10,21 @@ public class UpdateProductCommandHandler(IAppDbContext appDbContext)
 {
     public async Task Handle(UpdateProductCommand request, CancellationToken cancellationToken)
     {
-        var category = await appDbContext.Categories.FindAsync([request.Product.CategoryId], cancellationToken)
-                       ?? throw new NotFoundException("Category");
+        var category =
+            await appDbContext.Categories.FindAsync([request.Product.CategoryId], cancellationToken)
+            ?? throw new NotFoundException("Category");
 
-        var product = await appDbContext.Products.FindAsync([request.ProductId], cancellationToken)
-                      ?? throw new NotFoundException("Product");
+        var product =
+            await appDbContext.Products.FindAsync([request.ProductId], cancellationToken)
+            ?? throw new NotFoundException("Product");
 
         // Unique index on Code would otherwise surface as a 500
-        if (await appDbContext.Products.AnyAsync(
-                p => p.Code == request.Product.Code && p.Id != request.ProductId, cancellationToken))
+        if (
+            await appDbContext.Products.AnyAsync(
+                p => p.Code == request.Product.Code && p.Id != request.ProductId,
+                cancellationToken
+            )
+        )
             throw new ProductCodeAlreadyExistsException(request.Product.Code);
 
         product.Name = request.Product.Name;

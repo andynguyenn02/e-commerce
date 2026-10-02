@@ -17,6 +17,8 @@ public interface IAppDbContext
     DbSet<UserEntity> Users { get; set; }
     DbSet<WalletEntity> Wallets { get; set; }
     DbSet<WalletTransactionEntity> WalletTransactions { get; set; }
+    EntityEntry<TEntity> Entry<TEntity>(TEntity entity)
+        where TEntity : class;
     ChangeTracker ChangeTracker { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken);

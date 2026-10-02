@@ -12,7 +12,10 @@ public class ProductEntity : CommonEntity
 
     public required bool IsDeleted { get; set; }
 
-    public bool HasStockFor(int quantity) => AvailableQuantity >= quantity;
+    public bool HasStockFor(int quantity)
+    {
+        return AvailableQuantity >= quantity;
+    }
 
     public void SetPrice(decimal price)
     {

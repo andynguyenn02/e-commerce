@@ -1,7 +1,6 @@
 using ecommerce.Application.Common.Interfaces;
 using ecommerce.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace ecommerce.Infrastructure.Persistence;
