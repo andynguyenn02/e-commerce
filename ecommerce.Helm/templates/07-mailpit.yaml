@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mailpit
+  namespace: ecommerce
+spec:
+  replicas: {{ .Values.mail.replicas }}
+  selector:
+    matchLabels:
+      app: mailpit
+  template:
+    metadata:
+      labels:
+        app: mailpit
+    spec:
+      containers:
+        - name: mailpit
+          # Docker Hub image, not GHCR — no imagePullSecrets needed.
+          image: "{{.Values.mail.image.repository}}:{{.Values.mail.image.tag}}"
+          ports:
+            - containerPort: {{ .Values.mail.port.smtp }}
+            - containerPort: {{ .Values.mail.port.ui }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mailpit
+  namespace: ecommerce
+spec:
+  selector:
+    app: mailpit
+  # A Service with more than one port must name each one.
+  ports:
+    - name: smtp
+      port: {{ .Values.mail.port.smtp }}
+      targetPort: {{ .Values.mail.port.smtp }}
+    - name: ui
+      port: {{ .Values.mail.port.ui }}
+      targetPort: {{ .Values.mail.port.ui }}

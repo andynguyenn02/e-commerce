@@ -1,0 +1,36 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: migrate
+  namespace: ecommerce
+  annotations:
+    "helm.sh/hook": post-install,pre-upgrade
+    "helm.sh/hook-weight": "0"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  # Kubernetes has no depends_on: this Job may start before SQL Server is
+  # accepting connections, fail, and be retried. Failed attempts before a
+  # Completed one are expected, not a bug.
+  backoffLimit: 10
+  template:
+    spec:
+      # Required for a Job. Never would discard the pod on failure instead
+      # of retrying the container in place.
+      restartPolicy: OnFailure
+      # The GHCR packages are private, so every object pulling one of our
+      # images has to name this Secret.
+      imagePullSecrets:
+        - name: {{.Values.pullSecret}}
+      containers:
+        - name: migrate
+          image: "{{.Values.migrate.image.repository}}:{{.Values.migrate.image.tag}}"
+          # The image's ENTRYPOINT is ./efbundle; args are appended to it.
+          # $(VAR) is expanded by Kubernetes from this container's own env,
+          # so the connection string is declared once, not twice.
+          args: ["--connection", "$(ConnectionStrings__DefaultConnection)"]
+          env:
+            - name: ConnectionStrings__DefaultConnection
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: ConnectionStrings__DefaultConnection

@@ -1,0 +1,57 @@
+pullSecret: ghcr-pull
+
+db:
+  replicas: 1
+  image:
+    repository: mcr.microsoft.com/mssql/server
+    tag: 2022-latest
+  port: 1433
+  storage: 2Gi
+
+mail:
+  replicas: 1
+  image:
+    repository: axllent/mailpit
+    tag: v1.21
+  port:
+    smtp: 1025
+    ui: 8025
+
+api:
+  replicas: 1
+  storage: 1Gi
+  image:
+    repository: ghcr.io/andynguyenn02/ecommerce-api
+    tag: d710037
+  port: 8080
+  resources:
+    requests:
+      cpu: 100m
+      memory: 128Mi
+    limits:
+      cpu: 500m
+      memory: 512Mi
+
+web:
+  replicas: 1
+  image:
+    repository: ghcr.io/andynguyenn02/ecommerce-web
+    tag: d710037
+  port: 80
+  resources:
+    requests:
+      cpu: 50m
+      memory: 32Mi
+    limits:
+      cpu: 200m
+      memory: 64Mi
+      
+migrate:
+  image:
+    repository: ghcr.io/andynguyenn02/ecommerce-migrate
+    tag: d710037
+
+config:
+  environment: Development
+  smtpHost: mailpit
+  allowedOrigin: http://localhost:8080

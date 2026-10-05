@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+  namespace: ecommerce
+spec:
+  replicas: {{ .Values.web.replicas }}
+  selector:
+    matchLabels:
+      app: web
+  template:
+    metadata:
+      labels:
+        app: web
+    spec:
+      imagePullSecrets:
+        - name: {{.Values.pullSecret}}
+      containers:
+        - name: web
+          # image: ghcr.io/andynguyenn02/ecommerce-web:d710037
+          image: "{{ .Values.web.image.repository }}:{{ .Values.web.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.web.port }}
+          # No env: the image's API_UPSTREAM default (api:8080) already
+          # matches the api Service's name and port.
+          resources:
+            {{- toYaml .Values.web.resources | nindent 12}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+  namespace: ecommerce
+spec:
+  selector:
+    app: web
+  ports:
+    - port: {{ .Values.web.port }}
+      targetPort: {{ .Values.web.port }}

@@ -1,0 +1,42 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: seed
+  namespace: ecommerce
+  annotations:
+    "helm.sh/hook": post-install,pre-upgrade
+    "helm.sh/hook-weight": "1"
+    "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  # The hook-weight above orders this after the migrate Job. backoffLimit
+  # covers SQL Server still warming up when this first runs.
+  backoffLimit: 10
+  template:
+    spec:
+      restartPolicy: OnFailure
+      # Public image, same as the db — no imagePullSecrets needed.
+      containers:
+        - name: seed
+          image: mcr.microsoft.com/mssql/server:2022-latest
+          # command overrides the image ENTRYPOINT (like compose's "entrypoint");
+          # args is what compose called "command".
+          command: ["/bin/bash", "-c"]
+          args:
+            - /opt/mssql-tools18/bin/sqlcmd -C -b -S db -U sa -P "$MSSQL_SA_PASSWORD" -d EcommerceDb -i /seed/seed.sql
+          env:
+            - name: MSSQL_SA_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: app-secrets
+                  key: MSSQL_SA_PASSWORD
+          volumeMounts:
+            - name: seed-sql
+              mountPath: /seed
+              readOnly: true
+      # seed-sql is created by command from seeds/database/seed.sql, not
+      # committed here:
+      #   kubectl create configmap seed-sql -n ecommerce --from-file=seed.sql=seeds/database/seed.sql
+      volumes:
+        - name: seed-sql
+          configMap:
+            name: seed-sql
